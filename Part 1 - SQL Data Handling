@@ -1,0 +1,94 @@
+SELECT *
+FROM efood2022-357212.main_assessment.orders;
+
+CREATE TABLE efood2022-357212.main_assessment.table1 AS
+Select city, sum(amount) as amount, count(city) as orders, count(distinct user_id) as Users
+FROM efood2022-357212.main_assessment.orders
+GROUP BY city
+
+CREATE TABLE efood2022-357212.main_assessment.table2 AS
+Select city, cuisine, sum(amount) as amount, count(city) as orders, count(distinct user_id) as Users
+FROM efood2022-357212.main_assessment.orders
+WHERE cuisine = 'Breakfast'
+GROUP BY city, cuisine
+
+
+
+CREATE TABLE efood2022-357212.main_assessment.table3 AS
+select city, count(user_id) as total_orders_count_gt3
+from
+(
+      select user_id, city, count(user_id) as orders_count
+      from efood2022-357212.main_assessment.orders 
+      group by user_id ,city
+      having orders_count > 3
+)
+group by city 
+
+
+CREATE TABLE efood2022-357212.main_assessment.table5 AS
+SELECT table1.*, table3.total_orders_count_gt3
+FROM efood2022-357212.main_assessment.table1
+LEFT JOIN efood2022-357212.main_assessment.table3 
+ON table1.city = table3.city
+
+
+
+CREATE TABLE efood2022-357212.main_assessment.table4 AS
+select city, count(user_id) as total_orders_count_gt3, cuisine
+from
+(
+      select user_id, city, count(user_id) as orders_count ,cuisine
+      from efood2022-357212.main_assessment.orders 
+      group by user_id ,city, cuisine
+      having orders_count > 3
+)
+WHERE cuisine = 'Breakfast'
+group by city, cuisine 
+
+
+
+CREATE TABLE efood2022-357212.main_assessment.table6 AS
+SELECT table2.*, table4.total_orders_count_gt3
+FROM efood2022-357212.main_assessment.table2
+LEFT JOIN efood2022-357212.main_assessment.table4 
+ON table2.city = table4.city
+
+
+DROP TABLE efood2022-357212.main_assessment.table1;
+DROP TABLE efood2022-357212.main_assessment.table2;
+DROP TABLE efood2022-357212.main_assessment.table3;
+DROP TABLE efood2022-357212.main_assessment.table4;
+
+
+SELECT table5.city, table5.amount/table5.orders as efood_basket, table5.orders/table5.Users as efood_freq, table5.total_orders_count_gt3/table5.Users as efood_users3freq_perc, table6.amount/table6.orders as breakfast_basket, table6.orders/table6.Users as breakfast_freq, table6.total_orders_count_gt3/table6.Users as breakfast_users3freq_perc,
+FROM efood2022-357212.main_assessment.table5
+LEFT JOIN efood2022-357212.main_assessment.table6
+ON table5.city = table6.city
+ORDER BY table6.orders DESC
+LIMIT 5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
